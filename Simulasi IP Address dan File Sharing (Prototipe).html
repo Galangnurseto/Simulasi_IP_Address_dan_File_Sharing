@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulasi IP Address dan File Sharing (Prototipe)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{--bg:#F7F9FC;--card:#fff;--ink:#1A1A1A;--mute:#55606e;--pri:#1F3A5F;--acc:#4A90C2;--ok:#1e7a46;--okbg:#e6f4ec;--bad:#b3321f;--badbg:#fbeae7;--line:#d5dce6;--on:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101722;--card:#18222f;--ink:#e8edf3;--mute:#a3afbd;--pri:#7fb3e0;--acc:#4A90C2;--ok:#6fd49a;--okbg:#14301f;--bad:#ff9a8a;--badbg:#3a1b17;--line:#2c3a4b;--on:#0b1420}}
+:root[data-theme="dark"]{--bg:#101722;--card:#18222f;--ink:#e8edf3;--mute:#a3afbd;--pri:#7fb3e0;--acc:#4A90C2;--ok:#6fd49a;--okbg:#14301f;--bad:#ff9a8a;--badbg:#3a1b17;--line:#2c3a4b;--on:#0b1420}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.5rem;color:var(--pri);margin:0 0 4px}
+h2{font-size:1.05rem;margin:0 0 8px;color:var(--pri)}
+p{margin:0 0 8px}.mute{color:var(--mute);font-size:.92rem}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.tab{padding:10px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font:inherit;cursor:pointer;min-height:44px}
+.tab[aria-pressed="true"]{background:var(--pri);color:var(--on);border-color:var(--pri)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+.task{border-left:4px solid var(--acc)}
+.pcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+label{display:block;font-size:.88rem;color:var(--mute);margin:10px 0 4px}
+input[type=text]{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:500 1rem "JetBrains Mono",ui-monospace,Consolas,monospace;min-height:44px}
+input:focus-visible,button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.net{margin-top:10px;font-size:.9rem;color:var(--mute)}.net b{font-family:"JetBrains Mono",ui-monospace,monospace;color:var(--pri)}
+.btn{padding:11px 18px;border:0;border-radius:8px;background:var(--pri);color:var(--on);font:600 1rem Inter,system-ui,sans-serif;cursor:pointer;min-height:44px}
+.btn.alt{background:transparent;color:var(--pri);border:1px solid var(--pri)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.res{margin-top:12px;padding:12px;border-radius:8px;font-size:.96rem;display:none}
+.res.ok{display:block;background:var(--okbg);color:var(--ok);border:1px solid var(--ok)}
+.res.bad{display:block;background:var(--badbg);color:var(--bad);border:1px solid var(--bad)}
+.chk{display:flex;gap:8px;align-items:center;margin-top:10px}.chk input{width:20px;height:20px}
+.prog{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{padding:4px 10px;border-radius:99px;border:1px solid var(--line);font-size:.85rem;color:var(--mute)}
+.chip.done{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
+.ip{font:500 1.05rem "JetBrains Mono",ui-monospace,Consolas,monospace}.np{background:rgba(74,144,194,.22);border-bottom:2px solid var(--acc);padding:0 2px;font-weight:600}
+.q{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 10px}.q legend{font-weight:600;padding:0 4px}
+.q label{display:flex;gap:8px;align-items:center;margin:4px 0;color:var(--ink);font-size:.95rem}.q input{width:18px;height:18px}
+.ex{font-size:.9rem;margin-top:6px}.ex.ok{color:var(--ok)}.ex.bad{color:var(--bad)}
+textarea{width:100%;min-height:80px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+</style>
+</head>
+<body>
+<main>
+<h1>Simulasi IP Address dan File Sharing</h1>
+<p class="mute">Prototipe proposal UTS Teknologi Pembelajaran, kelas XI Jaringan Komputer. Ubah konfigurasi, jalankan ping, lalu coba akses folder.</p>
+
+<section class="card" id="intro"><h2>Pengantar: network ID</h2>
+<p>Dua komputer dapat saling berkomunikasi langsung jika <b>network ID</b>-nya sama. Network ID didapat dari IP address dan subnet mask.</p>
+<p class="ip"><span class="np">192.168.1</span>.10 dengan 255.255.255.0 menghasilkan network ID <span class="np">192.168.1</span>.0</p>
+<p class="mute">Bagian bergaris bawah (192.168.1) menunjukkan jaringan; angka terakhir (10) menunjukkan komputernya.</p></section>
+<div class="tabs" id="tabs" role="group" aria-label="Pilih skenario"></div>
+
+<section class="card task" aria-live="polite">
+<h2 id="st"></h2>
+<p id="sg"></p>
+<p class="mute" id="sq"></p>
+</section>
+
+<div class="pcs">
+<section class="card"><h2>PC-A (pengirim)</h2>
+<label for="ipA">IP address</label><input type="text" id="ipA" inputmode="decimal" autocomplete="off">
+<label for="mA">Subnet mask</label><input type="text" id="mA" inputmode="decimal" autocomplete="off">
+<div class="net" id="nA"></div></section>
+<section class="card"><h2>PC-B (pemilik folder “Data”)</h2>
+<label for="ipB">IP address</label><input type="text" id="ipB" inputmode="decimal" autocomplete="off">
+<label for="mB">Subnet mask</label><input type="text" id="mB" inputmode="decimal" autocomplete="off">
+<div class="chk"><input type="checkbox" id="sh"><label for="sh" style="margin:0">Folder “Data” dibagikan</label></div>
+<div class="net" id="nB"></div></section>
+</div>
+
+<section class="card"><h2>Langkah 1: uji koneksi</h2>
+<div class="row"><button class="btn" id="bp">Jalankan ping dari PC-A ke PC-B</button></div>
+<div class="res" id="rp" role="status"></div></section>
+
+<section class="card"><h2>Langkah 2: akses folder dari PC-A</h2>
+<label for="ad">Alamat akses (contoh format: \\IP-PC-B\Data)</label><input type="text" id="ad" autocomplete="off" spellcheck="false">
+<div class="row" style="margin-top:12px"><button class="btn" id="bf">Akses folder</button><button class="btn alt" id="br">Atur ulang skenario</button></div>
+<div class="res" id="rf" role="status"></div></section>
+
+<section class="card"><h2>Skenario selesai</h2><div class="prog" id="pg"></div>
+<p class="mute" style="margin-top:10px">Setelah selesai, tulis kesimpulanmu di LKPD: bagian IP mana yang menentukan satu jaringan?</p></section>
+<section class="card"><h2>Kuis akhir dan ringkasan</h2><div id="qz"></div><button class="btn" id="bk">Periksa jawaban</button>
+<div id="sum" style="display:none;margin-top:14px"><p id="sc"></p>
+<p>Ringkasan: network ID = IP address AND subnet mask. Dua komputer satu jaringan jika network ID-nya sama. IP address tidak boleh sama. Folder dibuka dengan alamat \\IP-PC-B\NamaFolder setelah ping berhasil dan folder dibagikan.</p>
+<label for="rf2">Refleksi: kesalahan apa yang paling sering kamu buat, dan bagaimana mencegahnya saat praktik nyata?</label><textarea id="rf2"></textarea></div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const SC=[
+{t:"Skenario 1: konfigurasi benar",g:"Jalankan ping, lalu akses folder. Amati hasilnya.",q:"Mengapa ping berhasil? Bagian mana yang sama pada kedua IP address?",a:"192.168.1.10",b:"192.168.1.11",m:"255.255.255.0",sh:true,ad:"\\\\192.168.1.11\\Data",goal:"ping"},
+{t:"Skenario 2: IP bentrok",g:"Jalankan ping, baca pesannya, lalu perbaiki konfigurasi hingga ping berhasil.",q:"Apa yang terjadi jika dua komputer memakai IP address yang sama?",a:"192.168.1.10",b:"192.168.1.10",m:"255.255.255.0",sh:true,ad:"\\\\192.168.1.11\\Data",goal:"ping"},
+{t:"Skenario 3: segmen jaringan berbeda",g:"Ping gagal padahal kabel tersambung. Temukan penyebabnya dan perbaiki.",q:"Mengapa ping gagal? Bandingkan network ID kedua komputer.",a:"192.168.1.10",b:"192.168.2.11",m:"255.255.255.0",sh:true,ad:"\\\\192.168.1.11\\Data",goal:"ping"},
+{t:"Skenario 4: file sharing gagal",g:"Ping berhasil, tetapi folder tidak dapat diakses. Perbaiki sampai folder terbuka.",q:"Sebutkan dua penyebab yang mungkin dan langkah pemeriksaannya.",a:"192.168.1.10",b:"192.168.1.11",m:"255.255.255.0",sh:false,ad:"\\\\192.168.1.101\\Data",goal:"folder"}
+];
+let cur=0,done=new Set(),pingOK=false;
+const toN=s=>{s=s.trim();if(!/^\d{1,3}(\.\d{1,3}){3}$/.test(s))return null;const p=s.split(".").map(Number);if(p.some(x=>x>255))return null;return((p[0]<<24)|(p[1]<<16)|(p[2]<<8)|p[3])>>>0};
+const fm=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join(".");
+function nets(){[["A","ipA","mA"],["B","ipB","mB"]].forEach(([k,i,m])=>{const a=toN($(i).value),b=toN($(m).value);$("n"+k).innerHTML=(a!==null&&b!==null)?"Network ID: <b>"+fm((a&b)>>>0)+"</b>":"Network ID: isi IP address dan subnet mask yang valid."})}
+function show(id,ok,msg){const e=$(id);e.className="res "+(ok?"ok":"bad");e.textContent=(ok?"✔ ":"✖ ")+msg}
+function load(i){cur=i;const s=SC[i];$("st").textContent=s.t;$("sg").textContent=s.g;$("sq").textContent="Pertanyaan pemantik: "+s.q;
+$("ipA").value=s.a;$("ipB").value=s.b;$("mA").value=s.m;$("mB").value=s.m;$("sh").checked=s.sh;$("ad").value=s.ad;
+$("rp").className="res";$("rf").className="res";pingOK=false;nets();draw()}
+function draw(){const t=$("tabs");t.innerHTML="";SC.forEach((s,i)=>{const b=document.createElement("button");b.className="tab";b.textContent="Skenario "+(i+1);b.setAttribute("aria-pressed",i===cur);b.onclick=()=>load(i);t.appendChild(b)});
+$("pg").innerHTML=SC.map((s,i)=>"<span class='chip"+(done.has(i)?" done":"")+"'>"+(done.has(i)?"✔ ":"")+"Skenario "+(i+1)+"</span>").join("")}
+function ping(){const a=toN($("ipA").value),b=toN($("ipB").value),ma=toN($("mA").value),mb=toN($("mB").value);pingOK=false;
+if([a,b,ma,mb].includes(null)){show("rp",false,"Format tidak valid. Tulis empat angka 0 sampai 255 yang dipisah titik.");return}
+if(a===b){show("rp",false,"IP bentrok: kedua komputer memakai "+fm(a)+". Beri IP address yang berbeda pada salah satu komputer.");return}
+const na=(a&ma)>>>0,nb=(b&mb)>>>0;
+if(((b&ma)>>>0)!==na||((a&mb)>>>0)!==nb){show("rp",false,"Request timed out. Network ID berbeda: PC-A "+fm(na)+" dan PC-B "+fm(nb)+". Samakan bagian network ID agar keduanya satu jaringan.");return}
+pingOK=true;show("rp",true,"Reply from "+fm(b)+": komputer satu jaringan (network ID "+fm(na)+").");
+if(SC[cur].goal==="ping")fin()}
+function folder(){const b=toN($("ipB").value);const v=$("ad").value.trim();
+if(!pingOK){show("rf",false,"Ping belum berhasil. Jalankan ping dan perbaiki konfigurasi lebih dulu.");return}
+if(!$("sh").checked){show("rf",false,"Akses ditolak: folder “Data” belum dibagikan di PC-B. Centang pilihan berbagi folder.");return}
+const m=/^\\\\([^\\]+)\\(.+)$/.exec(v);
+if(!m){show("rf",false,"Format alamat salah. Gunakan format \\\\IP-PC-B\\Data.");return}
+if(toN(m[1])!==b){show("rf",false,"Host tidak ditemukan: alamat memakai "+m[1]+", sedangkan IP PC-B adalah "+fm(b)+". Periksa ketikan angka.");return}
+if(m[2].toLowerCase()!=="data"){show("rf",false,"Nama folder berbagi tidak ditemukan. Nama yang benar: Data.");return}
+show("rf",true,"Folder “Data” terbuka. File sharing berhasil.");if(SC[cur].goal==="folder")fin()}
+function fin(){done.add(cur);draw()}
+["ipA","mA","ipB","mB"].forEach(i=>$(i).addEventListener("input",()=>{pingOK=false;nets()}));
+$("bp").onclick=ping;$("bf").onclick=folder;$("br").onclick=()=>load(cur);
+const Q=[
+{q:"IP address 192.168.1.10 dengan subnet mask 255.255.255.0. Berapa network ID-nya?",o:["192.168.1.0","192.168.0.0","192.168.1.10","255.255.255.0"],a:0,e:"Network ID = IP AND subnet mask, sehingga tiga bagian pertama tetap dan bagian terakhir menjadi 0."},
+{q:"Apakah 192.168.1.10 dan 192.168.2.10 (mask 255.255.255.0) berada pada jaringan yang sama?",o:["Ya, karena angka terakhirnya sama","Tidak, network ID-nya berbeda (192.168.1.0 dan 192.168.2.0)","Ya, karena keduanya berawalan 192.168","Tidak dapat ditentukan"],a:1,e:"Bagian ketiga berbeda (1 dan 2), jadi network ID berbeda dan ping gagal tanpa router."},
+{q:"Dua komputer sama-sama memakai 192.168.1.5. Apa akibatnya?",o:["Koneksi menjadi lebih cepat","IP bentrok","Subnet mask berubah otomatis","Folder otomatis terbuka"],a:1,e:"Setiap komputer pada satu jaringan harus punya IP address yang unik."},
+{q:"Ping ke PC-B (192.168.1.11) berhasil, tetapi akses \\\\192.168.1.101\\Data gagal. Penyebab yang paling mungkin?",o:["Kabel rusak","Alamat IP pada alamat akses salah ketik","Subnet mask salah","Network ID berbeda"],a:1,e:"Ping berhasil berarti koneksi dan network ID benar. Periksa ketikan IP pada alamat akses."},
+{q:"Alamat akses folder Data pada komputer ber-IP 10.0.0.5?",o:["\\\\10.0.0.5\\Data","//10.0.0.5/Data","\\\\Data\\10.0.0.5","10.0.0.5:Data"],a:0,e:"Formatnya dua garis miring terbalik, IP, garis miring terbalik, lalu nama folder."}];
+function qz(){$("qz").innerHTML=Q.map((x,i)=>"<fieldset class='q'><legend>"+(i+1)+". "+x.q+"</legend>"+x.o.map((o,j)=>"<label><input type='radio' name='q"+i+"' value='"+j+"'> "+o+"</label>").join("")+"<div class='ex' id='ex"+i+"'></div></fieldset>").join("")}
+function chk(){let s=0;Q.forEach((x,i)=>{const r=document.querySelector("input[name=q"+i+"]:checked");const ok=!!r&&+r.value===x.a;if(ok)s++;const e=$("ex"+i);e.className="ex "+(ok?"ok":"bad");e.textContent=(ok?"✔ Benar. ":"✖ Belum tepat. ")+x.e});
+$("sc").textContent="Skor kuis: "+s+" dari "+Q.length+". Skenario selesai: "+done.size+" dari "+SC.length+".";$("sum").style.display="block"}
+$("bk").onclick=chk;qz();
+load(0);
+</script>
+</body>
+</html>
